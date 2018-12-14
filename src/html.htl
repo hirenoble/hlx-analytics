@@ -16,21 +16,132 @@
   ~ limitations under the License.
   -->
 <html>
+
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <link rel="shortcut icon" type="image/x-icon" href="/dist/favicon.ico">
-    <title>${content.title}</title>
-    <link rel="stylesheet" href="/dist/style.css"/>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+	<title>${content.title}</title>
+	<link rel="stylesheet" href="/style.css" />
+	<script src='/jquery-1.8.0.min.js' type='text/javascript'></script>
+	<script src='/js.cookie.min.js' type='text/javascript'></script>
+	<script src='/aes.js' type='text/javascript'></script>
+	<script type="text/javascript">
+		$(function () {
+			function login() {
+				var oauthUrl = 'https://runtime.adobe.io/api/v1/web/io-solutions/default/oauth3';
+				var scopes =
+					'openid,AdobeID,read_organizations,additional_info.projectedProductContext,additional_info.job_function';
+				var redirectUrl = 'http://localhost:3000/analytics.html';
+				oauthUrl += '?service=analytics&scopes=' + scopes + '&redirect_url=' + redirectUrl;
+				window.location.replace(oauthUrl);
+			}
+
+			function logout() {
+				window.location.replace('https://adobedocs.github.io/analytics-2.0-apis/');
+			}
+
+			if ($.getUrlVar('gc_ids')) {
+				var gcids = $.getUrlVar('gc_ids').split('|');
+				var companyNames = $.getUrlVar('company_names').split('|');
+				var companySelector = document.getElementById('companySelector');
+
+				for (index in companyNames) {
+					companySelector.options[companySelector.options.length] = new Option(companyNames[index], gcids[index]);
+				}
+			}
+
+			if ($.getUrlVar('access_token')) {
+				// logout if access token is expired
+				var accessToken = $.getUrlVar('access_token');
+				var parsedWordArray = CryptoJS.enc.Base64.parse(accessToken.split('.')[1]);
+				var decodedTokenPayload = parsedWordArray.toString(CryptoJS.enc.Utf8);
+				var accessTokenObject = JSON.parse(decodedTokenPayload);
+				var expiresAt = parseFloat(accessTokenObject['created_at']) + parseFloat(accessTokenObject['expires_in']);
+				if (Date.now() >= expiresAt) {
+					console.log('Access Token has expired. Logging out.')
+					logout();
+				}
+
+				$('#input_accessToken').val(accessToken);
+
+				document.getElementById('select-company-container').style.display = 'block';
+				document.getElementById('login-container').style.display = 'none';
+
+				// we have an access token but no analytics companies
+				if (document.getElementById('companySelector').options.length < 1) {
+					document.getElementById('no-companies-available-container').style.display = 'inline';
+					document.getElementById('select-company-dropdown-container').style.display = 'none';
+				}
+			}
+
+			$('#button_login').click(login);
+			$('#button_logout').click(logout);
+		});
+
+		$.extend({
+			getUrlVars: function () {
+				var vars = [],
+					hash;
+				var href = window.location.href.replace(/(.*)\#[^\#]+$/, "$1");
+				var hashes = href.slice(href.indexOf('?') + 1).split('&');
+				for (var i = 0; i < hashes.length; i++) {
+					hash = hashes[i].split('=');
+					vars.push(hash[0]);
+					vars[hash[0]] = decodeURIComponent(hash[1]);
+				}
+				return vars;
+			},
+			getUrlVar: function (name) {
+				return $.getUrlVars()[name];
+			}
+		});
+	</script>
+
 </head>
+
 <body>
 
-<div data-sly-list="${content.children}">
-    <div class="container">${item}</div>
-</div>
+	<div id="controls-wrap">
+		<div id="controls-ui-container">
+			<div id="controls">
+				<form id='api_selector'>
+					<div id='login-container' style='display:block'>
+						<label>To start using the Analytics APIs you first need to login:</label>
+						<button class="blue button" type="button" id="button_login" style="margin-left:5px">Login</button>
+					</div>
+					<div id='select-company-container' style='display:none'>
+						<div id='select-company-dropdown-container' style='display:inline'>
+							<label>Select Company:</label>
+							<select id="companySelector" />
+						</div>
+						<div id='no-companies-available-container' style='display:none'>
+							<label>User does not have access to any Analytics Companies</label>
+						</div>
+						<button class="blue button" type="button" id="button_logout" style="margin-left:5px">Logout</button>
+					</div>
 
-<hr>
-<em>generated at ${content.time}</em>
+					<input id="input_accessToken" name="accessToken" type="hidden" value="" />
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div data-sly-list="${content.children}">
+		<div class="container">${item}</div>
+	</div>
+
+
+	<section data-sly-test="${content.meta.swagger}">
+		<hr>
+		<div id="swagger">${content.meta.swagger}</div>
+	</section>
+	<hr>
+	<em>generated at ${content.time}</em>
+
+	<script type="text/javascript" src="/swagger-loader.js"></script>
+
 
 </body>
+
 </html>
