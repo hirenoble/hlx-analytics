@@ -32,7 +32,7 @@
 				var oauthUrl = 'https://runtime.adobe.io/api/v1/web/io-solutions/default/oauth3';
 				var scopes =
 					'openid,AdobeID,read_organizations,additional_info.projectedProductContext,additional_info.job_function';
-				var redirectUrl = 'http://localhost:3000/analytics.html';
+				var redirectUrl = 'https://anything.helix-demo.xyz/analytics.html';
 				oauthUrl += '?service=analytics&scopes=' + scopes + '&redirect_url=' + redirectUrl;
 				window.location.replace(oauthUrl);
 			}
