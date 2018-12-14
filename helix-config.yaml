@@ -1,12 +1,12 @@
-content: https://github.com/hirenoble/hlx-api.git#master
-static: https://github.com/hirenoble/hlx-api.git#master
+content: https://github.com/hirenoble/hlx-analytics.git#master
+static: https://github.com/hirenoble/hlx-analytics.git#master
 staticRoot: /webroot
 directoryIndex: index.html
 
-#strains:
-#  default:
-#    code:
-#    content: https://github.com/hirenoble/hlx-api.git#master
-#    static: https://github.com/hirenoble/hlx-api.git#master
-#    staticRoot: /webroot
-#    directoryIndex: index.html
+strains:
+  default:
+    code:
+    content: https://github.com/hirenoble/hlx-analytics.git#master
+    static: https://github.com/hirenoble/hlx-analytics.git#master
+    staticRoot: /webroot
+    directoryIndex: index.html
